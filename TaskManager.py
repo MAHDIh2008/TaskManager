@@ -14,42 +14,58 @@ from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
 
-class MarketStructureApp(QMainWindow):
+class TaskManagerApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("To Do List")
+        self.setWindowTitle("Task Manager")
         self.setGeometry(100, 80, 800, 730)
 
         # Initialize variables
         self.goal_date = None
-        self.data_dir = "market_data"
+        self.data_dir = "task_data"  # Changed from market_data to task_data
         os.makedirs(self.data_dir, exist_ok=True)
 
         # Default tasks
         self.default_tasks = [
+            "Review daily goals",
+            "Complete priority tasks",
+            "Learning session",
+            "Exercise",
+            "Plan next day"
         ]
+        
         self.weekly_tasks = [f"Week {i + 1}" for i in range(13)]
         self.weekly_checkboxes = []
         self.todo_checkboxes = []
+        self.learning_checkboxes = []
 
         self.initialize_data_files()
         self.create_main_widgets()
         self.load_initial_data()
 
     def initialize_data_files(self):
-        """Create necessary data files if they don't exist"""
-        required_files = ["task_score.csv", "progress.txt", "custom_tasks.txt", "learning_tasks.txt"]
-        for file in required_files:
+        """Create necessary data files if they don't exist with proper validation"""
+        required_files = {
+            "task_score.csv": "",
+            "progress.txt": "",
+            "custom_tasks.txt": "\n".join(self.default_tasks),
+            "learning_tasks.txt": "\n".join(["Python Programming|0", 
+                                           "Data Structures|0",
+                                           "Algorithms|0"])
+        }
+        
+        for file, default_content in required_files.items():
             path = os.path.join(self.data_dir, file)
             if not os.path.exists(path):
-                with open(path, "w", encoding="utf-8") as f:
-                    if file == "custom_tasks.txt":
-                        f.write("\n".join(self.default_tasks))
-                    elif file == "learning_tasks.txt":
-                        default_learning = [
-                          ]
-                        f.write("\n".join(default_learning))
+                try:
+                    with open(path, "w", encoding="utf-8") as f:
+                        f.write(default_content)
+                except Exception as e:
+                    print(f"Error creating {file}: {e}")
+                    QMessageBox.warning(self, "File Error", 
+                                      f"Could not create {file}: {str(e)}")
 
+    # بقیه متدها بدون تغییر می‌مانند...
     def create_main_widgets(self):
         """Create all main widgets and tabs"""
         self.tab_widget = QTabWidget()
